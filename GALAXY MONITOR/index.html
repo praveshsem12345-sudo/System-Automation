@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Mode | Galaxy Study Monitor Pro</title>
+    <!-- Import Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Base Styles & Galaxy Theme */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #050510;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 40px 20px;
+            
+            /* Vertical Layout Configuration */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px; /* Space between each vertical section */
+            overflow-x: hidden;
+        }
+
+        /* Moving Galaxy Canvas */
+        #galaxyCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; 
+        }
+
+        /* Title Logo area */
+        .main-title {
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(206, 147, 216, 0.8);
+            margin: 0;
+            font-size: 2.5em;
+            letter-spacing: 2px;
+            animation: fadeInDown 1s ease-out forwards;
+        }
+        .main-subtitle {
+            color: #ce93d8;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInDown {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #ffffff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+            text-align: center;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Glassmorphism Cards with Pro Entry Animation */
+        .card {
+            background: linear-gradient(135deg, rgba(30, 30, 45, 0.7), rgba(15, 15, 25, 0.6));
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 35px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border 0.4s ease;
+            
+            /* Vertical Constraining */
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+
+            /* Entry Animation */
+            opacity: 0;
+            animation: slideUpFade 0.8s ease-out forwards;
+        }
+
+        /* Staggered loading for cards vertically */
+        .card:nth-child(3) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.6s; }
+        .card:nth-child(6) { animation-delay: 0.8s; }
+        .card:nth-child(7) { animation-delay: 1.0s; }
+        .card:nth-child(8) { animation-delay: 1.2s; }
+
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(60px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 20px 50px rgba(142, 36, 170, 0.4);
+            border: 1px solid rgba(142, 36, 170, 0.4);
+            background: linear-gradient(135deg, rgba(35, 35, 55, 0.8), rgba(20, 20, 35, 0.7));
+        }
+
+        /* ROUND ANALOG ALARM CLOCK */
+        .clock-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .analog-clock {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 5px solid rgba(142, 36, 170, 0.9);
+            background: radial-gradient(circle, rgba(20,20,30,1) 0%, rgba(0,0,0,1) 100%);
+            position: relative;
+            box-shadow: 0 0 35px rgba(142, 36, 170, 0.6), inset 0 0 25px rgba(142, 36, 170, 0.3);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        /* Smooth Ringing Animation */
+        .ringing {
+            animation: ringShake 0.4s infinite alternate;
+            border-color: #ff1744;
+            box-shadow: 0 0 50px rgba(255, 23, 68, 0.9), inset 0 0 30px rgba(255, 23, 68, 0.6);
+        }
+
+        @keyframes ringShake {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(4deg) scale(1.02); }
+            75% { transform: rotate(-4deg) scale(1.02); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            border-radius: 10px;
+            z-index: 10;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transition: transform 0.1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+        }
+
+        .hour-hand { width: 6px; height: 60px; background: #fff; margin-left: -3px; }
+        .minute-hand { width: 4px; height: 90px; background: #ce93d8; margin-left: -2px; }
+        .second-hand { width: 2px; height: 100px; background: #ff1744; margin-left: -1px; }
+        
+        .center-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: #ff1744;
+            transform: translate(-50%, -50%);
+            z-index: 11;
+            box-shadow: 0 0 12px rgba(255, 23, 68, 0.8);
+        }
+
+        .alarm-controls {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        input[type="time"], input[type="text"] {
+            padding: 15px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+            font-size: 1.1em;
+        }
+
+        input[type="time"]:focus, input[type="text"]:focus {
+            border-color: #ce93d8;
+            box-shadow: 0 0 15px rgba(142, 36, 170, 0.4);
+            background: rgba(20,20,30,0.8);
+        }
+
+        input[type="text"] { flex-grow: 1; }
+
+        /* Premium Buttons */
+        button {
+            background: rgba(50, 50, 50, 0.8);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 25px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            font-size: 1.05em;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:active { transform: scale(0.95); }
+        button:hover { 
+            background: rgba(80, 80, 80, 0.9); 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        
+        .btn-start { background: linear-gradient(135deg, #2e7d32, #1b5e20); border: none; }
+        .btn-start:hover { background: linear-gradient(135deg, #388e3c, #2e7d32); box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4); }
+        .btn-pause { background: linear-gradient(135deg, #f57c00, #e65100); border: none; }
+        .btn-pause:hover { background: linear-gradient(135deg, #fb8c00, #f57c00); box-shadow: 0 5px 15px rgba(245, 124, 0, 0.4); }
+        .btn-stop { background: linear-gradient(135deg, #d32f2f, #b71c1c); border: none; }
+        .btn-stop:hover { box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4); }
+        .btn-save { background: linear-gradient(135deg, #1976d2, #1565c0); border: none; width: 100%; margin-top: 20px; padding: 18px; font-size: 1.2em;}
+        .btn-download { background: linear-gradient(135deg, #8e24aa, #6a1b9a); border: none; width: 100%; margin-top: 15px; padding: 15px;}
+        
+        /* StopWatch Display */
+        .clock-display {
+            font-size: 4.5em; 
+            font-family: 'Courier New', Courier, monospace;
+            color: #00e676; 
+            background: rgba(0, 0, 0, 0.6);
+            padding: 25px; 
+            border-radius: 12px;
+            border: 1px solid rgba(0, 230, 118, 0.4);
+            text-shadow: 0 0 25px rgba(0, 230, 118, 0.9);
+            text-align: center; 
+            margin-bottom: 25px;
+            letter-spacing: 4px;
+        }
+
+        /* Motivation Area */
+        .motivation-area { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 200px; }
+        .slogan-text {
+            font-size: 1.6em; font-style: italic; color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            margin-bottom: 30px; line-height: 1.6; min-height: 90px;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Lists & Tables */
+        ul { list-style: none; padding: 0; margin: 0; }
+        li {
+            background: rgba(0,0,0,0.5); margin: 15px 0; padding: 18px 20px;
+            border-radius: 8px; display: flex; justify-content: space-between;
+            align-items: center; border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease; font-size: 1.1em;
+        }
+        li:hover {
+            transform: translateX(10px); background: rgba(20,20,30,0.8);
+            border-color: rgba(206, 147, 216, 0.5);
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; border-radius: 8px; overflow: hidden; font-size: 1.1em;}
+        th, td { border: 1px solid rgba(255,255,255,0.05); padding: 15px; text-align: left; }
+        th { background: rgba(0,0,0,0.8); color: #ce93d8; }
+        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        tr:hover { background: rgba(255,255,255,0.08); }
+
+        /* World Clock */
+        .world-clock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
+        .time-zone { 
+            background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; 
+            text-align: center; border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s, background 0.3s;
+        }
+        .time-zone:hover { transform: scale(1.08); background: rgba(0,0,0,0.8); border-color: rgba(100, 181, 246, 0.6);}
+        .time-zone span { display: block; font-size: 1.8em; color: #64b5f6; font-family: monospace; text-shadow: 0 0 10px rgba(100,181,246,0.6); margin-top: 8px;}
+    </style>
+</head>
+<body>
+
+    <!-- GALAXY BACKGROUND (RADIATING TO BORDERS) -->
+    <canvas id="galaxyCanvas"></canvas>
+
+    <div style="text-align: center;">
+        <h1 class="main-title">GALAXY MONITOR</h1>
+        <div class="main-subtitle">Focus & Study Pro</div>
+    </div>
+
+    <!-- ALARM CLOCK SECTION -->
+    <div class="card">
+        <h2>⏰ Alarm Clock</h2>
+        <div class="clock-wrapper">
+            <div class="analog-clock" id="analogClock">
+                <div class="hand hour-hand" id="hourHand"></div>
+                <div class="hand minute-hand" id="minuteHand"></div>
+                <div class="hand second-hand" id="secondHand"></div>
+                <div class="center-dot"></div>
+            </div>
+            <div class="alarm-controls">
+                <input type="time" id="alarmInput">
+                <button class="btn-start" onclick="setAlarm()">Set Alarm</button>
+                <button class="btn-stop" onclick="stopAlarm()" id="stopAlarmBtn" style="display:none;">Stop Audio</button>
+            </div>
+            <p id="alarmStatus" style="color: #ce93d8; font-size: 1.1em; margin-top: 15px; font-weight: bold;">No alarm set</p>
+        </div>
+    </div>
+
+    <!-- STOPWATCH SECTION -->
+    <div class="card">
+        <h2>⏱️ Study Timer</h2>
+        <div class="clock-display" id="display">00:00:00</div>
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <button class="btn-start" style="flex: 1; padding: 15px; font-size: 1.1em;" onclick="startTimer()">START FOCUS</button>
+            <button class="btn-pause" style="flex: 1; padding: 15px; font-size: 1.1em;" onclick="pauseTimer()">PAUSE</button>
+            <button style="flex: 1; padding: 15px; font-size: 1.1em;" onclick="resetTimer()">RESET</button>
+        </div>
+        <button class="btn-save" onclick="saveSession()">Log Study Session to Database</button>
+    </div>
+
+    <!-- TO-DO LIST SECTION -->
+    <div class="card">
+        <h2>📝 Task List</h2>
+        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+            <input type="text" id="taskInput" placeholder="Add a new study task...">
+            <button class="btn-start" onclick="addTask()">Add Task</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+
+    <!-- MOTIVATION SECTION -->
+    <div class="card motivation-area">
+        <h2>✨ Motivation Engine</h2>
+        <div class="slogan-text" id="sloganText">"Loading inspiration..."</div>
+        <div style="display: flex; gap: 15px; width: 100%;">
+            <button onclick="generateSlogan()" style="background: linear-gradient(135deg, #00838f, #006064); flex: 1; border: none; padding: 15px; font-size:1.1em;">🔄 Generate Next</button>
+            <button onclick="readSloganAloud()" style="background: linear-gradient(135deg, #d81b60, #880e4f); flex: 1; border: none; padding: 15px; font-size:1.1em;">🗣️ Read Aloud (Female)</button>
+        </div>
+    </div>
+
+    <!-- VISUAL ANALYTICS -->
+    <div class="card">
+        <h2>📊 Study Analytics (Minutes per Day)</h2>
+        <canvas id="studyChart" height="120"></canvas>
+    </div>
+
+    <!-- STUDY RECORDS SECTION -->
+    <div class="card">
+        <h2>📈 Study History</h2>
+        <table>
+            <thead><tr><th>Date Completed</th><th>Duration Recorded</th></tr></thead>
+            <tbody id="recordsBody"></tbody>
+        </table>
+        <div style="display: flex; gap: 15px;">
+            <button class="btn-download" style="flex: 2;" onclick="downloadCSVReport()">📥 Download CSV Report</button>
+            <button class="btn-pause" style="flex: 1;" onclick="clearRecords()">🗑️ Clear History</button>
+        </div>
+    </div>
+
+    <!-- WORLD CLOCK SECTION -->
+    <div class="card">
+        <h2>🌍 Global Timezones</h2>
+        <div class="world-clock-grid">
+            <div class="time-zone"><strong style="color: #fff;">🇮🇳 India</strong><span id="tz-india">--:--</span></div>
+            <div class="time-zone"><strong style="color: #fff;">🇺🇸 USA (EST)</strong><span id="tz-usa">--:--</span></div>
+            <div class="time-zone"><strong style="color: #fff;">🇬🇧 UK (GMT)</strong><span id="tz-uk">--:--</span></div>
+            <div class="time-zone"><strong style="color: #fff;">🇯🇵 Japan</strong><span id="tz-japan">--:--</span></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 0. SOUND SYSTEM (WEB AUDIO API) ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        // Tap Sound Generator
+        function playClickSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(900, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // Attach tap sound globally
+        document.body.addEventListener('click', (e) => {
+            if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) {
+                playClickSound();
+            }
+        });
+
+        // Alarm Beep Generator
+        let beepInterval;
+        function playSingleBeep() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(700, audioCtx.currentTime); 
+            
+            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime + 0.3); 
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function startAlarmAudio() {
+            playSingleBeep();
+            beepInterval = setInterval(playSingleBeep, 600); 
+        }
+
+        function stopAlarmAudio() { clearInterval(beepInterval); }
+
+        // --- 1. GALAXY ANIMATION (RADIATING TO BORDERS) ---
+        const canvas = document.getElementById('galaxyCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, centerX, centerY;
+        
+        function resizeCanvas() { 
+            width = canvas.width = window.innerWidth; 
+            height = canvas.height = window.innerHeight; 
+            centerX = width / 2;
+            centerY = height / 2;
+        }
+        window.addEventListener('resize', resizeCanvas); 
+        resizeCanvas();
+
+        const numStars = 600;
+        const stars = [];
+        
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * width - centerX,
+                y: Math.random() * height - centerY,
+                z: Math.random() * width,
+                pz: 0 
+            });
+        }
+
+        let speed = 2.5; // Warp speed velocity
+
+        function animateGalaxy() {
+            // Draw a semi-transparent black rectangle to create light trails
+            ctx.fillStyle = 'rgba(5, 5, 16, 0.4)';
+            ctx.fillRect(0, 0, width, height);
+
+            stars.forEach(star => {
+                // Move stars towards the viewer (decreasing Z)
+                star.z -= speed;
+                
+                // If star passes the screen, reset it far away in the center-ish
+                if (star.z <= 0) {
+                    star.x = Math.random() * width - centerX;
+                    star.y = Math.random() * height - centerY;
+                    star.z = width;
+                    star.pz = width;
+                }
+
+                // Map 3D coordinates to 2D screen coordinates
+                let sx = (star.x / star.z) * (width / 2) + centerX;
+                let sy = (star.y / star.z) * (width / 2) + centerY;
+
+                // Previous frame position for the line trail
+                let px = (star.x / star.pz) * (width / 2) + centerX;
+                let py = (star.y / star.pz) * (width / 2) + centerY;
+                
+                star.pz = star.z;
+
+                // Stars closer to screen (lower Z) are thicker
+                let size = Math.max(0.2, (1 - star.z / width) * 3);
+
+                // Calculate opacity based on distance
+                let opacity = (1 - star.z / width);
+
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+                ctx.lineWidth = size;
+                ctx.moveTo(px, py);
+                ctx.lineTo(sx, sy);
+                ctx.stroke();
+            });
+            requestAnimationFrame(animateGalaxy);
+        }
+        animateGalaxy();
+
+        // --- 2. ROUND ANALOG CLOCK & ALARM ---
+        let alarmTime = null;
+        let alarmPlaying = false;
+        const clockElement = document.getElementById('analogClock');
+        const stopBtn = document.getElementById('stopAlarmBtn');
+        const alarmStatus = document.getElementById('alarmStatus');
+
+        function setAlarm() {
+            const input = document.getElementById('alarmInput').value;
+            if(input) {
+                alarmTime = input;
+                alarmStatus.innerText = `🟢 Alarm locked in for ${alarmTime}`;
+                alarmStatus.style.color = "#00e676";
+            }
+        }
+
+        function stopAlarm() {
+            stopAlarmAudio();
+            alarmPlaying = false;
+            clockElement.classList.remove('ringing');
+            stopBtn.style.display = 'none';
+            alarmTime = null; 
+            alarmStatus.innerText = "Alarm stopped. Ready for next session.";
+            alarmStatus.style.color = "#ce93d8";
+            document.getElementById('alarmInput').value = "";
+        }
+
+        function tickClock() {
+            const now = new Date();
+            const hr = now.getHours();
+            const min = now.getMinutes();
+            const sec = now.getSeconds();
+
+            const hrDeg = (hr % 12) * 30 + (min * 0.5);
+            const minDeg = min * 6 + (sec * 0.1);
+            const secDeg = sec * 6;
+
+            document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${hrDeg}deg)`;
+            document.getElementById('minuteHand').style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+            document.getElementById('secondHand').style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
+
+            if (alarmTime && !alarmPlaying) {
+                const currentHM = `${String(hr).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+                if (currentHM === alarmTime) {
+                    alarmPlaying = true;
+                    startAlarmAudio();
+                    clockElement.classList.add('ringing');
+                    stopBtn.style.display = 'inline-block';
+                    alarmStatus.innerText = "🚨 WAKE UP & FOCUS! 🚨";
+                    alarmStatus.style.color = "#ff1744";
+                }
+            }
+        }
+        setInterval(tickClock, 1000);
+        tickClock(); 
+
+        // --- 3. MOTIVATION & TEXT-TO-SPEECH ---
+        const slogans = [
+            "Believe you can and you're halfway there.",
+            "Study now, be proud later.",
+            "Don’t stop when you’re tired. Stop when you’re done.",
+            "The secret of getting ahead is getting started.",
+            "Small steps every day bring giant results.",
+            "Push yourself, because no one else is going to do it for you.",
+            "Success is the sum of small efforts, repeated day in and day out."
+        ];
+        
+        let currentSlogan = "";
+
+        function generateSlogan() {
+            const textElement = document.getElementById('sloganText');
+            textElement.style.opacity = 0; 
+            
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * slogans.length);
+                currentSlogan = slogans[randomIndex];
+                textElement.innerText = `"${currentSlogan}"`;
+                textElement.style.opacity = 1; 
+            }, 300);
+        }
+        generateSlogan(); 
+
+        function readSloganAloud() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(currentSlogan);
+                
+                const voices = window.speechSynthesis.getVoices();
+                const femaleVoice = voices.find(v => 
+                    v.name.toLowerCase().includes('female') || 
+                    v.name.toLowerCase().includes('samantha') || 
+                    v.name.toLowerCase().includes('zira') ||
+                    v.name.toLowerCase().includes('victoria') ||
+                    v.name.toLowerCase().includes('google uk english female')
+                );
+                
+                if (femaleVoice) { utterance.voice = femaleVoice; }
+                utterance.pitch = 1.3; 
+                utterance.rate = 0.95;  
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Your browser does not support the Web Speech API.");
+            }
+        }
+        window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
+
+        // --- 4. STOPWATCH LOGIC ---
+        let startTime, updatedTime, difference = 0, tInterval, savedTime = 0, running = false;
+        const display = document.getElementById("display");
+
+        function startTimer() {
+            if (!running) {
+                startTime = new Date().getTime() - savedTime;
+                tInterval = setInterval(() => {
+                    updatedTime = new Date().getTime();
+                    difference = updatedTime - startTime;
+                    let h = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let m = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                    let s = Math.floor((difference % (1000 * 60)) / 1000);
+                    display.innerHTML = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                }, 1000);
+                running = true;
+            }
+        }
+        function pauseTimer() { if (running) { clearInterval(tInterval); savedTime = new Date().getTime() - startTime; running = false; } }
+        function resetTimer() { clearInterval(tInterval); savedTime = 0; running = false; display.innerHTML = "00:00:00"; }
+
+        // --- 5. STUDY RECORDS, CHART & CSV LOGIC ---
+        let myChart = null; 
+        function saveSession() {
+            if (display.innerHTML === "00:00:00") return;
+            let records = JSON.parse(localStorage.getItem("studyRecords")) || [];
+            records.push({ date: new Date().toLocaleDateString(), duration: display.innerHTML });
+            localStorage.setItem("studyRecords", JSON.stringify(records));
+            resetTimer(); loadRecords(); renderChart(); 
+        }
+        function loadRecords() {
+            let records = JSON.parse(localStorage.getItem("studyRecords")) || [];
+            let tbody = document.getElementById("recordsBody"); tbody.innerHTML = "";
+            records.forEach(r => { tbody.innerHTML += `<tr><td>${r.date}</td><td><strong style="color:#00e676;">${r.duration}</strong></td></tr>`; });
+        }
+        function clearRecords() {
+            if(confirm("Are you sure you want to wipe your entire database?")) { localStorage.removeItem("studyRecords"); loadRecords(); renderChart(); }
+        }
+        function downloadCSVReport() {
+            let records = JSON.parse(localStorage.getItem("studyRecords")) || [];
+            if (records.length === 0) return alert("No records to download!");
+            let csvContent = "data:text/csv;charset=utf-8,Date,Duration\n" + records.map(e => `${e.date},${e.duration}`).join("\n");
+            let link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "Pro_Study_Report.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+        function renderChart() {
+            let records = JSON.parse(localStorage.getItem("studyRecords")) || [];
+            let dailyTotals = {};
+            records.forEach(r => {
+                let p = r.duration.split(':');
+                dailyTotals[r.date] = (dailyTotals[r.date] || 0) + (p[0]*60) + parseInt(p[1]) + (p[2]/60);
+            });
+            const ctx = document.getElementById('studyChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            Chart.defaults.color = '#e0e0e0';
+            Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            Chart.defaults.font.size = 14;
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(dailyTotals),
+                    datasets: [{ 
+                        label: 'Minutes Studied', 
+                        data: Object.values(dailyTotals).map(v=>v.toFixed(1)), 
+                        backgroundColor: 'rgba(142, 36, 170, 0.3)', 
+                        borderColor: '#ce93d8', 
+                        borderWidth: 4, 
+                        fill: true, 
+                        tension: 0.4,
+                        pointBackgroundColor: '#00e676',
+                        pointBorderColor: '#fff',
+                        pointRadius: 6,
+                        pointHoverRadius: 9
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { tooltip: { backgroundColor: 'rgba(0,0,0,0.8)', titleFont: {size: 16}, bodyFont: {size: 16, weight: 'bold'} } },
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } 
+                }
+            });
+        }
+
+        // --- 6. TO-DO LIST ---
+        function addTask() {
+            let val = document.getElementById("taskInput").value.trim();
+            if(!val) return;
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.push(val); localStorage.setItem("tasks", JSON.stringify(tasks));
+            document.getElementById("taskInput").value = ""; loadTasks();
+        }
+        function loadTasks() {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            document.getElementById("taskList").innerHTML = tasks.map((t, i) => `
+                <li>
+                    <span style="font-weight: 500;">${t}</span>
+                    <button style="background: linear-gradient(135deg, #c62828, #b71c1c); padding: 8px 16px; border: none; font-size: 0.9em; font-weight: bold; border-radius: 5px; cursor:pointer;" onclick="deleteTask(${i})">Complete ✓</button>
+                </li>`).join('');
+        }
+        function deleteTask(i) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")); tasks.splice(i, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks)); loadTasks();
+        }
+
+        // --- 7. WORLD CLOCK ---
+        function updateWorldClocks() {
+            const opt = { timeStyle: 'medium', hour12: false };
+            document.getElementById('tz-india').innerText = new Intl.DateTimeFormat('en-US', { ...opt, timeZone: 'Asia/Kolkata' }).format(new Date());
+            document.getElementById('tz-usa').innerText = new Intl.DateTimeFormat('en-US', { ...opt, timeZone: 'America/New_York' }).format(new Date());
+            document.getElementById('tz-uk').innerText = new Intl.DateTimeFormat('en-US', { ...opt, timeZone: 'Europe/London' }).format(new Date());
+            document.getElementById('tz-japan').innerText = new Intl.DateTimeFormat('en-US', { ...opt, timeZone: 'Asia/Tokyo' }).format(new Date());
+        }
+        setInterval(updateWorldClocks, 1000); 
+        updateWorldClocks();
+
+        // Init
+        loadRecords(); loadTasks(); renderChart();
+    </script>
+</body>
+</html>
